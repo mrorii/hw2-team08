@@ -18,7 +18,7 @@ import edu.cmu.lti.oaqa.framework.data.Keyterm;
 
 /**
  *
- * @author Naoki Orii
+ * @author Xiaobo Hu, inherit from Naoki Orii
  */
 public class XiaobohKeytermExtractor extends AbstractKeytermExtractor {
 
