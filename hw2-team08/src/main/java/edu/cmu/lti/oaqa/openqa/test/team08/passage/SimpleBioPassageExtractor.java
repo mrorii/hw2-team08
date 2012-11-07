@@ -1,4 +1,4 @@
-package edu.cmu.lti.f12.hw2.hw2_team08.passage;
+package edu.cmu.lti.oaqa.openqa.test.team08.passage;
 
 import java.util.ArrayList;
 import java.util.List;
