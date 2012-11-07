@@ -20,7 +20,7 @@ import edu.cmu.lti.oaqa.framework.data.Keyterm;
  *
  * @author Naoki Orii
  */
-public class NoriiKeytermExtractor extends AbstractKeytermExtractor {
+public class XiaobohKeytermExtractor extends AbstractKeytermExtractor {
 
   public static final String PARAM_MODELFILE = "model_file";
 

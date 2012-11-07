@@ -1,4 +1,4 @@
-class: edu.cmu.lti.f12.hw2.hw2_team08.keyterm.NoriiKeytermExtractor
+class: edu.cmu.lti.f12.hw2.hw2_team08.keyterm.XiaobohKeytermExtractor
 model_file: src/main/resources/model/ne-en-bio-genetag.HmmChunker
 
 persistence-provider: |
