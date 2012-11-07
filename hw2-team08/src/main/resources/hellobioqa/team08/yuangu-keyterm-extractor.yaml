@@ -1,0 +1,7 @@
+class: edu.cmu.lti.f12.hw2.hw2_team08.keyterm.YuanGuKeytermExtractor
+ModelFile: src/main/resources/model/ne-en-bio-genetag.HmmChunker
+BestChunkNumber: 10
+ConfidenceThreshold: "0.6"
+
+persistence-provider: |
+  inherit: ecd.default-log-persistence-provider
