@@ -1,4 +1,4 @@
-package edu.cmu.lti.f12.hw2.hw2_team08.keyterm;
+package edu.cmu.lti.oaqa.openqa.test.team08;
 
 import java.io.File;
 import java.io.IOException;
