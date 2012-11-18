@@ -12,6 +12,7 @@ import edu.cmu.lti.oaqa.openqa.hello.retrieval.SimpleSolrRetrievalStrategist;
 public class SimpleBioSolrRetrievalStrategist extends SimpleSolrRetrievalStrategist {
 
   protected List<RetrievalResult> retrieveDocuments(String query) {
+
     List<RetrievalResult> result = new ArrayList<RetrievalResult>();
     try {
       SolrDocumentList docs = wrapper.runQuery(query, hitListSize);
@@ -26,6 +27,7 @@ public class SimpleBioSolrRetrievalStrategist extends SimpleSolrRetrievalStrateg
     } catch (Exception e) {
       System.err.println("Error retrieving documents from Solr: " + e);
     }
+
     return result;
   }
 
