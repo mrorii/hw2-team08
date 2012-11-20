@@ -8,18 +8,19 @@ persistence-provider:
 collection-reader:
   inherit: hellobioqa.collection.decorated-collection-reader
   dataset: TRECGEN06
-  # file: /input/trecgen06.txt
-  file: /input/trecgen06.head.txt
+  file: /input/trecgen06.txt
+  # file: /input/trecgen06.head.txt
 
 pipeline:
   - inherit: jdbc.sqlite.cse.phase  
     name: keyterm-extractor
     options: |
-      - inherit: helloqa.keyterm.simple
-      - inherit: hellobioqa.team08.yuangu-keyterm-extractor
-      - inherit: hellobioqa.team08.norii-keyterm-extractor
-      - inherit: hellobioqa.team08.xiaoboh-keyterm-extractor
-      - inherit: hellobioqa.team08.amr1-keyterm-extractor
+      # - inherit: helloqa.keyterm.simple
+      # - inherit: hellobioqa.team08.norii-keyterm-extractor
+      # - inherit: hellobioqa.team08.yuangu-keyterm-extractor
+      # - inherit: hellobioqa.team08.xiaoboh-keyterm-extractor
+      # - inherit: hellobioqa.team08.amr1-keyterm-extractor
+      - inherit: hellobioqa.team08.gs-keyterm-extractor
 
   - inherit: jdbc.sqlite.cse.phase 
     name: retrieval-strategist
@@ -35,8 +36,9 @@ pipeline:
 
   - inherit: jdbc.eval.retrieval-aggregator-consumer
       
-  - inherit: helloqa.eval.passage-map-aggregator-consumer      
-    
+  - inherit: helloqa.eval.passage-map-aggregator-consumer
+  
+ 
 post-process: 
   - inherit: helloqa.eval.keyterm-evaluator-consumer
   - inherit: report.csv-report-generator
@@ -48,8 +50,7 @@ post-process:
     builders: |
       - inherit: jdbc.report.f-measure-report-component
           
-  - inherit: helloqa.eval.passage-map-evaluator-consumer
-  - inherit: report.csv-report-generator
-    builders: |
-      - inherit: helloqa.report.map-report-component
-  
+  #- inherit: helloqa.eval.passage-map-evaluator-consumer
+  #- inherit: report.csv-report-generator
+  #  builders: |
+  #    - inherit: helloqa.report.map-report-component
