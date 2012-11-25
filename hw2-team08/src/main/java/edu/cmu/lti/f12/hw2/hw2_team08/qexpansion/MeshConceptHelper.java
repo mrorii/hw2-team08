@@ -79,7 +79,13 @@ public class MeshConceptHelper {
   }
 
   public String getHypernym(String query) {
-    return mNameNodeMap.get(query).getParentNode().getTreeName();
+    String hypernym = "";
+    try {
+      hypernym = mNameNodeMap.get(query).getParentNode().getTreeName();
+    } catch (Exception e) {
+      // pass
+    }
+    return hypernym;
   }
   
   public static class Node {

@@ -56,16 +56,12 @@ public class MeshQueryExpansionIndexer {
     IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_36, analyzer);
     iwc.setOpenMode(OpenMode.CREATE);
     IndexWriter writer = new IndexWriter(dir, iwc);
-    
-    File meshGzipFile = new File(meshGzipPath);
-    indexDoc(writer, meshGzipFile);
-  }
 
-  private void indexDoc(IndexWriter writer, File meshGzipFile) throws IOException {
     MeshParser parser = new MeshParser();
     MeshHandler handler = new MeshHandler(writer);
     parser.setHandler(handler);
-    
+
+    File meshGzipFile = new File(meshGzipPath);
     InputStream fileIn = new FileInputStream(meshGzipFile); 
     InputStream gzipIn = new GZIPInputStream(fileIn);
     InputSource inSource = new InputSource(gzipIn); 
@@ -78,10 +74,12 @@ public class MeshQueryExpansionIndexer {
   
   static class MeshHandler implements ObjectHandler<Mesh> {
     private IndexWriter writer;
+    private MeshConceptHelper conceptHelper;
 
     public MeshHandler(IndexWriter writer) {
       super();
       this.writer = writer;
+      this.conceptHelper = MeshConceptHelper.getInstance();
     }
 
     @Override
@@ -96,11 +94,27 @@ public class MeshQueryExpansionIndexer {
               Field.Store.YES, Field.Index.ANALYZED);
       doc.add(descriptorField);
       
+      // Store synonym(s)
       List<MeshConcept> conceptList = mesh.conceptList();
       for (MeshConcept meshConcept : conceptList) {
         Field synonymField = new Field("synonym", meshConcept.conceptNameUi().name(),
                 Field.Store.YES, Field.Index.ANALYZED);
         doc.add(synonymField);
+      }
+      
+      // Store hyponym(s)/hypernym
+      List<String> treeNumbers = mesh.treeNumberList();
+      for (String treeNumber : treeNumbers) {
+        String hypernym = this.conceptHelper.getHypernym(treeNumber);
+        List<String> hyponyms = this.conceptHelper.getHyponyms(treeNumber);
+        
+        Field hypernymField = new Field("hypernym", hypernym, Field.Store.YES, Field.Index.ANALYZED);
+        doc.add(hypernymField);
+        
+        for (String hyponym : hyponyms) {
+          Field hyponymField = new Field("hyponym", hyponym, Field.Store.YES, Field.Index.ANALYZED);
+          doc.add(hyponymField);
+        }
       }
       
       try {

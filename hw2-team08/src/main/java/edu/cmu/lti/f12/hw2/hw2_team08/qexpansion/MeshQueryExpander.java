@@ -73,10 +73,19 @@ public class MeshQueryExpander extends AbstractQueryExpander {
       }
       
       Document doc = searcher.doc(hits[0].doc);
-      String[] values = doc.getValues("synonym");
-      for (String v : values) {
-        retval.add(v);
+      String[] synonyms = doc.getValues("synonym");
+      for (String synonym : synonyms) {
+        retval.add(synonym);
       }
+      
+      String hypernym = doc.get("hypernym");
+      retval.add(hypernym);
+      
+      String[] hyponyms = doc.getValues("hyponym");
+      for (String hyponym : hyponyms) {
+        retval.add(hyponym);
+      }
+      
     } catch (CorruptIndexException e) {
       e.printStackTrace();
     } catch (IOException e) {
