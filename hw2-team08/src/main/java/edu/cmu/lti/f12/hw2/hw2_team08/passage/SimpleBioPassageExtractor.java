@@ -9,6 +9,7 @@ import org.jsoup.Jsoup;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
+import edu.cmu.lti.oaqa.cse.basephase.ie.AbstractPassageExtractor;
 import edu.cmu.lti.oaqa.framework.data.Keyterm;
 import edu.cmu.lti.oaqa.framework.data.PassageCandidate;
 import edu.cmu.lti.oaqa.framework.data.RetrievalResult;
@@ -34,7 +35,7 @@ public class SimpleBioPassageExtractor extends SimplePassageExtractor {
         text = text.substring(0, Math.min(5000, text.length()));
         System.out.println(text);
 
-        PassageCandidateFinder finder = new PassageCandidateFinder(id, text,
+        PassageCandidateFinder finder = new NoOverlapsPassageCandidateFinder(id, text,
                 new KeytermWindowScorerSum());
         List<String> keytermStrings = Lists.transform(keyterms, new Function<Keyterm, String>() {
           public String apply(Keyterm keyterm) {
@@ -43,8 +44,10 @@ public class SimpleBioPassageExtractor extends SimplePassageExtractor {
         });
         List<PassageCandidate> passageSpans = finder.extractPassages(keytermStrings
                 .toArray(new String[0]));
-        for (PassageCandidate passageSpan : passageSpans)
+        for (PassageCandidate passageSpan : passageSpans) {
+          System.out.println(passageSpan);
           result.add(passageSpan);
+        }
       } catch (SolrServerException e) {
         e.printStackTrace();
       }
@@ -52,4 +55,8 @@ public class SimpleBioPassageExtractor extends SimplePassageExtractor {
     return result;
   }
 
+  public static int main(String[] args) {
+    return 2;
+  }
+  
 }
