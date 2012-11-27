@@ -4,12 +4,14 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-
+import java.util.List;
 
 /**
- * The GeneEntrezWrapper class wraps the Gene Entrez dictionary. Given a gene name,
- * it will automatically retrieve the synonyms of this gene.
+ * The GeneEntrezWrapper class wraps the Gene Entrez dictionary. Given a gene name, it will
+ * automatically retrieve the synonyms of this gene.
  * 
  * @author <a href="mailto:yuangu@andrew.cmu.edu">Yuan Gu</a>
  */
@@ -52,8 +54,12 @@ public class GeneEntrezWrapper {
   }
 
   /* Get the synonyms of a gene (if any). If the gene is not contained in the dict, returns null. */
-  public String[] getSynonyms(String gene) {
-    return mGeneSynonymMap.get(gene);
+  public List<String> getSynonyms(String gene) {
+    String[] arrSyns = mGeneSynonymMap.get(gene);
+    if (arrSyns != null)
+      return Arrays.asList(arrSyns);
+
+    return null;
   }
 
   public static void main(String[] args) throws Exception {

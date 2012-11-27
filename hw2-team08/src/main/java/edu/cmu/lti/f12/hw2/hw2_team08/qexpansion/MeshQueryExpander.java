@@ -57,7 +57,7 @@ public class MeshQueryExpander extends AbstractQueryExpander {
   }
   
   @Override
-  List<String> expandQuery(String q) {
+  public List<String> expandQuery(String q) {
     List<String> retval = new ArrayList<String>();
     
     try {
@@ -100,7 +100,7 @@ public class MeshQueryExpander extends AbstractQueryExpander {
   public static void main(String[] args) {
     MeshQueryExpander expander = MeshQueryExpander.getInstance();
     
-    String query = "breast cancer";
+    String query = "head";
     List<String> expandedQueries = expander.expandQuery(query);
     
     for (String expandedQuery : expandedQueries) {
