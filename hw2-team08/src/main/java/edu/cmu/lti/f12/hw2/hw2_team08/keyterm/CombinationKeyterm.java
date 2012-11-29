@@ -55,13 +55,14 @@ public class CombinationKeyterm extends AbstractKeytermExtractor {
     
     stoptermsSet.add("role");
     stoptermsSet.add("do");
-    termStatMap.put("NN", 1); // 1 : entity
-    termStatMap.put("NNP", 1); // 1 : entity
-    termStatMap.put("NNS", 1);
-    termStatMap.put("JJ", 2); // 2 : prefix
-    termStatMap.put("VBG", 2);
-    termStatMap.put("POS", 3); // 3 : conjunction
-    termStatMap.put("VBP", 11);
+    termStatMap.put("NN", 11);  //1 : entity
+    termStatMap.put("NNP", 11); //1 : entity
+    termStatMap.put("NNS", 11);
+    termStatMap.put("JJ", 12);  //2 : prefix
+    termStatMap.put("VBG", 12);
+    termStatMap.put("POS", 13); //3 : conjunction
+    termStatMap.put("VBP", 21);
+    termStatMap.put("VB", 21); 
   }
 
   @Override
@@ -143,8 +144,8 @@ public class CombinationKeyterm extends AbstractKeytermExtractor {
     try {
       while ((line = reader.readLine()) != null) {
         String query = line.split("\\|")[1];
-//        System.out.println(line);
-//        System.out.println(t.getKeyterms(query));
+        System.out.println(line);
+        System.out.println(t.getKeyterms(query));
 
       }
     } catch (IOException e) {
