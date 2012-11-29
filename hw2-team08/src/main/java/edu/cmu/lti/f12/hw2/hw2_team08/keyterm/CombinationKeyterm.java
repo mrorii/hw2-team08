@@ -143,8 +143,8 @@ public class CombinationKeyterm extends AbstractKeytermExtractor {
     try {
       while ((line = reader.readLine()) != null) {
         String query = line.split("\\|")[1];
-        System.out.println(line);
-        System.out.println(t.getKeyterms(query));
+//        System.out.println(line);
+//        System.out.println(t.getKeyterms(query));
 
       }
     } catch (IOException e) {
