@@ -1,6 +1,7 @@
 package edu.cmu.lti.f12.hw2.hw2_team08.retrieval;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.apache.solr.common.SolrDocument;
@@ -9,6 +10,8 @@ import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.resource.ResourceInitializationException;
 
+import edu.cmu.lti.f12.hw2.hw2_team08.qexpansion.AbstractQueryExpander;
+import edu.cmu.lti.f12.hw2.hw2_team08.qexpansion.AdamQueryExpander;
 import edu.cmu.lti.f12.hw2.hw2_team08.qexpansion.MeshQueryExpander;
 import edu.cmu.lti.f12.hw2.hw2_team08.util.GeneEntrezWrapper;
 import edu.cmu.lti.oaqa.core.provider.solr.SolrWrapper;
@@ -27,8 +30,9 @@ public class QueryExpansionRetrievalStrategist extends AbstractRetrievalStrategi
 
   protected SolrWrapper wrapper;
 
-  private MeshQueryExpander meshQueryExpander;
-
+  private AbstractQueryExpander meshQueryExpander;
+  private AbstractQueryExpander adamQueryExpander;
+  
   private GeneEntrezWrapper geneEntrezWrapper;
 
   @Override
@@ -51,6 +55,7 @@ public class QueryExpansionRetrievalStrategist extends AbstractRetrievalStrategi
     }
 
     this.meshQueryExpander = MeshQueryExpander.getInstance();
+    this.adamQueryExpander = AdamQueryExpander.getInstance();
     this.geneEntrezWrapper = GeneEntrezWrapper.getInstance();
     String geneEntrezDictPath = (String) aContext.getConfigParameterValue("gene-dict-path");
     this.geneEntrezWrapper.loadDict(geneEntrezDictPath);
@@ -77,6 +82,13 @@ public class QueryExpansionRetrievalStrategist extends AbstractRetrievalStrategi
       List<String> meshExpandedKeyterms = this.meshQueryExpander.expandQuery(strKeyterm);
       if (meshExpandedKeyterms != null)
         expandedKeyterms.addAll(meshExpandedKeyterms);
+      
+      List<String> adamExpandedKeyterms = this.adamQueryExpander.expandQuery(strKeyterm);
+      if (adamExpandedKeyterms != null)
+        expandedKeyterms.addAll(adamExpandedKeyterms);
+      
+      // Remove duplicate keyterms
+      expandedKeyterms = new ArrayList<String>(new LinkedHashSet<String>(expandedKeyterms));
 
       String queryComponent = "(" + strKeyterm;
       for (String strExpandedTerm : expandedKeyterms) {
