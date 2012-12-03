@@ -22,39 +22,37 @@ import java.util.Properties;
 public class AdamQueryExpander extends AbstractQueryExpander {
 
   private Map<String, List<String>> mTermVariantMap;
-  
+
   // Use singleton pattern
   private static AdamQueryExpander instance = null;
 
   public static AdamQueryExpander getInstance() {
     if (instance == null) {
-      try {
-        instance = new AdamQueryExpander();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+      instance = new AdamQueryExpander();
     }
     return instance;
   }
-  
-  private AdamQueryExpander() throws IOException {
-    mTermVariantMap = new HashMap<String, List<String>>();
-    
-    Properties prop = new Properties();
-    InputStreamReader isr = new InputStreamReader(
-            new FileInputStream("qexpansion.properties"), "UTF-8");
-    prop.load(isr);
-    
-    String adamFilePath = prop.getProperty("adam_rawfile");
 
-    loadMap(adamFilePath);
+  private AdamQueryExpander() {
+  }
+
+  @Override
+  public boolean init(Properties prop) {
+    mTermVariantMap = new HashMap<String, List<String>>();
+    String adamDataBasePath = prop.getProperty("database");
+    try {
+      loadMap(adamDataBasePath);
+    } catch (IOException e) {
+      return false;
+    }
+    return true;
   }
 
   private void loadMap(String filePath) throws FileNotFoundException, IOException {
-    BufferedReader br = new BufferedReader(
-            new InputStreamReader(new FileInputStream(new File(filePath))));
+    BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(
+            filePath))));
     String line;
-    
+
     while ((line = br.readLine()) != null) {
       if (line.startsWith("#")) {
         continue;
@@ -62,36 +60,43 @@ public class AdamQueryExpander extends AbstractQueryExpander {
       String[] columns = line.split("\t");
 
       String term = columns[0];
-      if (! mTermVariantMap.containsKey(term)) {
+      if (!mTermVariantMap.containsKey(term)) {
         mTermVariantMap.put(term, new ArrayList<String>());
       }
-      
+
       String[] variants = columns[2].split("\\|");
       for (int i = 0; i < variants.length; i++) {
         String variant = variants[i];
         String[] tmp = variant.split(":");
         String var = tmp[0];
-        
+
         mTermVariantMap.get(term).add(var);
       }
     }
   }
-  
+
   @Override
-  public List<String> expandQuery(String query) {
+  public List<String> expandQuery(String query, int size) {
     List<String> retval = new ArrayList<String>();
     if (mTermVariantMap.containsKey(query)) {
       retval = mTermVariantMap.get(query);
     }
+
+    if (retval.size() > size)
+      return retval.subList(0, size);
+
     return retval;
   }
-  
-  public static void main(String[] args) {
-    AbstractQueryExpander expander = AdamQueryExpander.getInstance();
-    
+
+  public static void main(String[] args) throws FileNotFoundException, IOException {
+    AdamQueryExpander expander = AdamQueryExpander.getInstance();
+    Properties prop = new Properties();
+    prop.setProperty("database", "src/main/resources/data/adam_database");
+    expander.init(prop);
+
     String query = "BRCA1";
-    List<String> expandedQueries = expander.expandQuery(query);
-    
+    List<String> expandedQueries = expander.expandQuery(query, 1);
+
     for (String expandedQuery : expandedQueries) {
       System.out.println(expandedQuery);
     }
