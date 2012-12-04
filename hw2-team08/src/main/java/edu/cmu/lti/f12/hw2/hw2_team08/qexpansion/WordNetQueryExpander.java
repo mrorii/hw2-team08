@@ -74,8 +74,11 @@ public class WordNetQueryExpander extends AbstractQueryExpander {
     ISynset synset = word.getSynset();
     List<IWord> words = synset.getWords();
     List<String> expandedQueries = new ArrayList<String>(words.size());
-    for (IWord w : synset.getWords())
-      expandedQueries.add(w.getLemma());
+    for (IWord w : synset.getWords()) {
+      String lemma = w.getLemma();
+      lemma = lemma.replaceAll("_", " ");
+      expandedQueries.add(lemma);
+    }
     
     if (expandedQueries.size() > size)
       return expandedQueries.subList(0, size);
@@ -90,7 +93,7 @@ public class WordNetQueryExpander extends AbstractQueryExpander {
     expander.init(prop);
 
     String query = "affected";
-    List<String> expandedQueries = expander.expandQuery(query, 1);
+    List<String> expandedQueries = expander.expandQuery(query, 100);
 
     for (String expandedQuery : expandedQueries) {
       System.out.println(expandedQuery);
