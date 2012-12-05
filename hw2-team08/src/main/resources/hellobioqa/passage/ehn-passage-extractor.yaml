@@ -1,0 +1,20 @@
+class: edu.cmu.lti.f12.hw2.hw2_team08.passage.EhnKeytermPassageExtractor
+# embedded: true
+# core: data/guten
+
+hit-list-size: 1
+server: http://peace.isri.cs.cmu.edu:9080/solr/genomics-simple/
+port: 9080
+numberOfKeytermWindowScorer: 5
+
+keytermWindowScorers: [edu.cmu.lti.f12.hw2.hw2_team08.passage.KeytermMatchesScore, edu.cmu.lti.f12.hw2.hw2_team08.passage.PercentMatchesScore, edu.cmu.lti.f12.hw2.hw2_team08.passage.PassageBrevityScore, edu.cmu.lti.f12.hw2.hw2_team08.passage.PassageOffsetScore]
+
+keytermScorerLambdas: [.45d, .15d, .25d, .15d]
+overlapThreshold: .33d
+keytermMatchLimit: 5
+passageSizeLimit: 512
+maxPassages: 10
+
+persistence-provider: |
+  inherit: ecd.default-log-persistence-provider
+
