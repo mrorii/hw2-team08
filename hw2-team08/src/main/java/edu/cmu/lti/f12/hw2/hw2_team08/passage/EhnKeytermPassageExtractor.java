@@ -4,7 +4,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,6 +11,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.resource.ResourceInitializationException;
+import org.jsoup.Jsoup;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -21,9 +21,8 @@ import edu.cmu.lti.oaqa.cse.basephase.ie.AbstractPassageExtractor;
 import edu.cmu.lti.oaqa.framework.data.Keyterm;
 import edu.cmu.lti.oaqa.framework.data.PassageCandidate;
 import edu.cmu.lti.oaqa.framework.data.RetrievalResult;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
-public class KeytermPassageExtractor extends AbstractPassageExtractor {
+public class EhnKeytermPassageExtractor extends AbstractPassageExtractor {
 
 	private static DecimalFormat score = new DecimalFormat( "0.000" );
 	private CompositeKeytermWindowScorer scorer;
@@ -56,10 +55,6 @@ public class KeytermPassageExtractor extends AbstractPassageExtractor {
 		passageSizeLimit = (Integer)aContext.getConfigParameterValue( "passageSizeLimit" );
 		maxPassages = (Integer)aContext.getConfigParameterValue( "maxPassages" );
 
-		// keytermMatchLimit = Integer.parseInt( (String)aContext.getConfigParameterValue( "keytermMatchLimit" ) );
-		// passageSizeLimit = Integer.parseInt( (String) aContext.getConfigParameterValue( "passageSizeLimit" ) );
-		// maxPassages = Integer.parseInt( (String)aContext.getConfigParameterValue( "maxPassages" ) );
-		
 		overlapThreshold = Double.parseDouble((String)aContext.getConfigParameterValue( "overlapThreshold" ));		
 		List<Double> scorerLambdas = new ArrayList<Double>();
 		for ( String lambdaString : (String[])aContext.getConfigParameterValue( "keytermScorerLambdas" )) 
@@ -83,15 +78,21 @@ public class KeytermPassageExtractor extends AbstractPassageExtractor {
 	}
 
 	@Override
-	protected List<PassageCandidate> extractPassages( String question, List<Keyterm> keyterms, List<RetrievalResult> documents ) {
+	protected List<PassageCandidate> extractPassages( String question, List<Keyterm> keyterms,
+	        List<RetrievalResult> documents ) {
 		List<PassageCandidate> result = new ArrayList<PassageCandidate>();
 		for ( RetrievalResult document : documents ) {
 			String id = document.getDocID();
 			try {
-				String text = wrapper.getDocText( id );
+				String htmlText = wrapper.getDocText( id );
+        String text = Jsoup.parse(htmlText).text().replaceAll("([\177-\377\0-\32]*)", "")/* .trim() */;
+
 				List<String> keytermStrings = Lists.transform(keyterms, new Function<Keyterm, String>() {
-					public String apply(Keyterm keyterm) { return keyterm.getText(); }
+					public String apply(Keyterm keyterm) {
+					  return keyterm.getText();
+					}
 				});
+				
 				List<PassageCandidate> passageSpans = extractTextPassages( id , text , keytermStrings.toArray(new String[0]) );
 				passageSpans = removeOverlappingPassages( passageSpans );
 				for ( PassageCandidate passageSpan : passageSpans ) 
@@ -102,7 +103,9 @@ public class KeytermPassageExtractor extends AbstractPassageExtractor {
 		}
 		Collections.sort( result , comparator );
 		System.out.println( "Raw passages: " + result.size() );
-		result = result.subList( 0 , maxPassages );
+		if (result.size() > maxPassages) {
+      result = result.subList(0, maxPassages);
+    }
 		System.out.println( "Passages returned: " + result.size() );
 		int rank = 0;
 		for ( PassageCandidate p : result ) {
