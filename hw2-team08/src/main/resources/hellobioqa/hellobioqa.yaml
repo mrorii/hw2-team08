@@ -20,14 +20,15 @@ pipeline:
       # - inherit: hellobioqa.team08.yuangu-keyterm-extractor
       # - inherit: hellobioqa.team08.xiaoboh-keyterm-extractor
       # - inherit: hellobioqa.team08.amr1-keyterm-extractor
-      # - inherit: hellobioqa.team08.gs-keyterm-extractor
-      - inherit: hellobioqa.team08.combination-extractor
+      - inherit: hellobioqa.team08.gs-keyterm-extractor
+      # - inherit: hellobioqa.team08.combination-extractor
 
   - inherit: jdbc.sqlite.cse.phase 
     name: retrieval-strategist
     options: |
       # - inherit: hellobioqa.retrieval.simple-solr-strategist
-      - inherit: hellobioqa.retrieval.query-expansion-strategist
+      # - inherit: hellobioqa.retrieval.query-expansion-strategist
+      - inherit: hellobioqa.retrieval.gs-expansion-strategist
           
   - inherit: jdbc.sqlite.cse.phase  
     name: passage-extractor
@@ -52,7 +53,7 @@ post-process:
     builders: |
       - inherit: jdbc.report.f-measure-report-component
           
-  #- inherit: helloqa.eval.passage-map-evaluator-consumer
-  #- inherit: report.csv-report-generator
-  #  builders: |
-  #    - inherit: helloqa.report.map-report-component
+  - inherit: helloqa.eval.passage-map-evaluator-consumer
+  - inherit: report.csv-report-generator
+    builders: |
+      - inherit: helloqa.report.map-report-component

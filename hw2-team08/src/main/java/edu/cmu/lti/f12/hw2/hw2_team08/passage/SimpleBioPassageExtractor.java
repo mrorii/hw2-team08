@@ -35,7 +35,8 @@ public class SimpleBioPassageExtractor extends SimplePassageExtractor {
         text = text.substring(0, Math.min(5000, text.length()));
         System.out.println(text);
 
-        PassageCandidateFinder finder = new NoOverlapsPassageCandidateFinder(id, text,
+//        PassageCandidateFinder finder = new NoOverlapsPassageCandidateFinder(id, text,
+        PassageCandidateFinder finder = new PassageCandidateFinder(id, text,
                 new KeytermWindowScorerSum());
         List<String> keytermStrings = Lists.transform(keyterms, new Function<Keyterm, String>() {
           public String apply(Keyterm keyterm) {
