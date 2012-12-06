@@ -9,6 +9,5 @@
 target/
 
 # Query expansion related files #
-*.lucene.index
 *.bin
 *.gz
