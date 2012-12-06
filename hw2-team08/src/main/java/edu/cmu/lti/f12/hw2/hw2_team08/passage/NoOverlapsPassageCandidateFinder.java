@@ -63,6 +63,7 @@ public class NoOverlapsPassageCandidateFinder extends PassageCandidateFinder {
     }
 
     passages.removeAll(toIgnore);
+    passages.addAll(toAdd);
 
     return passages;
   }
