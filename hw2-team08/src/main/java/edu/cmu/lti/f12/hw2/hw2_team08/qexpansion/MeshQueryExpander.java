@@ -1,9 +1,9 @@
 package edu.cmu.lti.f12.hw2.hw2_team08.qexpansion;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -46,8 +46,11 @@ public class MeshQueryExpander extends AbstractQueryExpander {
   @Override
   public boolean init(Properties prop) {
     try {
-      this.reader = IndexReader.open(FSDirectory.open(new File(prop.getProperty("index"))));
+      URI indexDir = getClass().getClassLoader().getResource((String) prop.getProperty("index")).toURI();
+      this.reader = IndexReader.open(FSDirectory.open(new File(indexDir)));
     } catch (IOException e) {
+      return false;
+    } catch (URISyntaxException e) {
       return false;
     }
     this.searcher = new IndexSearcher(reader);
@@ -104,7 +107,7 @@ public class MeshQueryExpander extends AbstractQueryExpander {
   public static void main(String[] args) throws CorruptIndexException, IOException {
     MeshQueryExpander expander = MeshQueryExpander.getInstance();
     Properties prop = new Properties();
-    prop.setProperty("index", "src/main/resources/data/mesh.lucene.index");
+    prop.setProperty("index", "data/mesh.lucene.index");
     expander.init(prop);
 
     String query = "head";

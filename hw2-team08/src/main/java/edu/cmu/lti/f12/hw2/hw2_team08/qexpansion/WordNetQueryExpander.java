@@ -1,7 +1,6 @@
 package edu.cmu.lti.f12.hw2.hw2_team08.qexpansion;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +36,7 @@ public class WordNetQueryExpander extends AbstractQueryExpander {
   public boolean init(Properties prop) {
     URL url;
     try {
-      url = new URL("file", null, prop.getProperty("dictionary"));
+      url = getClass().getClassLoader().getResource((String) prop.getProperty("dictionary"));
       dict = new Dictionary(url);
       dict.open();
       stemmer = new WordnetStemmer(dict);
@@ -89,7 +88,7 @@ public class WordNetQueryExpander extends AbstractQueryExpander {
   public static void main(String[] args) throws IOException {
     AbstractQueryExpander expander = WordNetQueryExpander.getInstance();
     Properties prop = new Properties();
-    prop.setProperty("dictionary", "src/main/resources/data/wordnet-dict");
+    prop.setProperty("dictionary", "data/wordnet-dict");
     expander.init(prop);
 
     String query = "affected";

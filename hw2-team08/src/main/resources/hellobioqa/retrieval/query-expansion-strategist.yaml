@@ -1,10 +1,10 @@
 class: edu.cmu.lti.f12.hw2.hw2_team08.retrieval.QueryExpansionRetrievalStrategist
 server: http://peace.isri.cs.cmu.edu:9080/solr/genomics-simple/
 port: 9080
-gene-dict-path: src/main/resources/data/dict.txt
-adam-database-path: src/main/resources/data/adam_database 
-mesh-index-path: src/main/resources/data/mesh.lucene.index
-wordnet-dictionary-path: src/main/resources/data/wordnet-dict
+gene-dict-path: data/dict.txt
+adam-database-path: data/adam_database
+mesh-index-path: data/mesh.lucene.index
+wordnet-dictionary-path: data/wordnet-dict
 expand-factor: 5
 #cross-opts:
     #hit-list-size: ["10", "100", "200", "300"]

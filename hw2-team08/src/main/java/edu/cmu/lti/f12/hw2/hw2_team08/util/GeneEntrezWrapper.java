@@ -1,9 +1,12 @@
 package edu.cmu.lti.f12.hw2.hw2_team08.util;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,11 +39,16 @@ public class GeneEntrezWrapper {
 
   /* Load a dict from the path, the dict has format "<word>\t<sym1> <sym2>...<symn>" */
   public void loadDict(String path) {
+    
+    URI dictPath;
     BufferedReader br;
     String line;
 
     try {
-      br = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
+      dictPath = getClass().getClassLoader().getResource(path).toURI();
+      File dictFile = new File(dictPath);
+
+      br = new BufferedReader(new InputStreamReader(new FileInputStream(dictFile)));
       while ((line = br.readLine()) != null) {
         String[] splitTmp = line.split("\t");
         String gene = splitTmp[0].trim();
@@ -49,8 +57,9 @@ public class GeneEntrezWrapper {
       }
     } catch (IOException e) {
       e.printStackTrace();
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
     }
-
   }
 
   /* Get the synonyms of a gene (if any). If the gene is not contained in the dict, returns null. */
@@ -64,9 +73,8 @@ public class GeneEntrezWrapper {
 
   public static void main(String[] args) throws Exception {
     GeneEntrezWrapper wrapper = GeneEntrezWrapper.getInstance();
-    wrapper.loadDict("src/main/resources/data/dict.txt");
+    wrapper.loadDict("data/dict.txt");
     for (String s : wrapper.getSynonyms("GJ15797"))
       System.out.println(s);
   }
-
 }
