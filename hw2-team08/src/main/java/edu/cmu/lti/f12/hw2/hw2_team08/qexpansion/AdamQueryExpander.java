@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,18 +41,21 @@ public class AdamQueryExpander extends AbstractQueryExpander {
   @Override
   public boolean init(Properties prop) {
     mTermVariantMap = new HashMap<String, List<String>>();
-    String adamDataBasePath = prop.getProperty("database");
+    
     try {
-      loadMap(adamDataBasePath);
+      URI indexDir = getClass().getClassLoader().getResource((String) prop.getProperty("database")).toURI();
+      File adamFile = new File(indexDir);
+      loadMap(adamFile);
     } catch (IOException e) {
+      return false;
+    } catch (URISyntaxException e) {
       return false;
     }
     return true;
   }
 
-  private void loadMap(String filePath) throws FileNotFoundException, IOException {
-    BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(
-            filePath))));
+  private void loadMap(File file) throws FileNotFoundException, IOException {
+    BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
     String line;
 
     while ((line = br.readLine()) != null) {
@@ -91,7 +96,7 @@ public class AdamQueryExpander extends AbstractQueryExpander {
   public static void main(String[] args) throws FileNotFoundException, IOException {
     AdamQueryExpander expander = AdamQueryExpander.getInstance();
     Properties prop = new Properties();
-    prop.setProperty("database", "src/main/resources/data/adam_database");
+    prop.setProperty("database", "data/adam_database");
     expander.init(prop);
 
     String query = "BRCA1";
