@@ -56,7 +56,6 @@ public class WordNetQueryExpander extends AbstractQueryExpander {
     return instance;
   }
 
-  /* returns null if no similar words found */
   @Override
   public List<String> expandQuery(String query, int size) {
 
