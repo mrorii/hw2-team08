@@ -5,11 +5,11 @@ gene-dict-path: src/main/resources/data/dict.txt
 adam-database-path: src/main/resources/data/adam_database 
 mesh-index-path: src/main/resources/data/mesh.lucene.index
 wordnet-dictionary-path: src/main/resources/data/wordnet-dict
-expand-factor: 5
+expand-factor: 3
 #cross-opts:
     #hit-list-size: ["10", "100", "200", "300"]
     #expand-factor: ["5", "10", "20", "50"]
-hit-list-size: 100
+hit-list-size: 500
 
 persistence-provider: |
   inherit: ecd.default-log-persistence-provider
