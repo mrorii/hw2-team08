@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -46,13 +47,12 @@ public class MeshQueryExpander extends AbstractQueryExpander {
   @Override
   public boolean init(Properties prop) {
     try {
-      URI indexDir = getClass().getClassLoader().getResource((String) prop.getProperty("index")).toURI();
-      this.reader = IndexReader.open(FSDirectory.open(new File(indexDir)));
+      URL indexDir = getClass().getClassLoader().getResource((String) prop.getProperty("index"));
+      this.reader = IndexReader.open(FSDirectory.open(new File(indexDir.toString())));
     } catch (IOException e) {
       return false;
-    } catch (URISyntaxException e) {
-      return false;
     }
+    
     this.searcher = new IndexSearcher(reader);
     this.analyzer = new StandardAnalyzer(Version.LUCENE_36);
     return true;
