@@ -47,9 +47,11 @@ public class MeshQueryExpander extends AbstractQueryExpander {
   @Override
   public boolean init(Properties prop) {
     try {
-      URL indexDir = getClass().getClassLoader().getResource((String) prop.getProperty("index"));
-      this.reader = IndexReader.open(FSDirectory.open(new File(indexDir.toString())));
+      URI indexDir = getClass().getClassLoader().getResource((String) prop.getProperty("index")).toURI();
+      this.reader = IndexReader.open(FSDirectory.open(new File(indexDir)));
     } catch (IOException e) {
+      return false;
+    } catch (URISyntaxException e) {
       return false;
     }
     
