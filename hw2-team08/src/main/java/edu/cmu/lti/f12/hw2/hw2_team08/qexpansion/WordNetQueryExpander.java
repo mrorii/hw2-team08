@@ -36,7 +36,9 @@ public class WordNetQueryExpander extends AbstractQueryExpander {
 		try {
 
 			File dictFile = new File((String) prop.getProperty("parameter"));
-			dict = new Dictionary(dictFile);
+			String dictPath = (String) prop.getProperty("parameter");
+			URL url = this.getClass().getResource(dictPath);
+			dict = new Dictionary(url);
 			dict.open();
 			stemmer = new WordnetStemmer(dict);
 		} catch (IOException e) {
