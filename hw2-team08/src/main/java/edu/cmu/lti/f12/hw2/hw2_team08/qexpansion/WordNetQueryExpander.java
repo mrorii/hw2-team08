@@ -35,10 +35,12 @@ public class WordNetQueryExpander extends AbstractQueryExpander {
 	public boolean init(Properties prop) {
 		try {
 
-			File dictFile = new File((String) prop.getProperty("parameter"));
 			String dictPath = (String) prop.getProperty("parameter");
+			File dictFile = new File(this.getClass().getResource(dictPath)
+					.getFile());
+
 			URL url = this.getClass().getResource(dictPath);
-			dict = new Dictionary(url);
+			dict = new Dictionary(dictFile);
 			dict.open();
 			stemmer = new WordnetStemmer(dict);
 		} catch (IOException e) {
