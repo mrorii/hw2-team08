@@ -39,7 +39,6 @@ public class WordNetQueryExpander extends AbstractQueryExpander {
 			File dictFile = new File(this.getClass().getResource(dictPath)
 					.getFile());
 
-			URL url = this.getClass().getResource(dictPath);
 			dict = new Dictionary(dictFile);
 			dict.open();
 			stemmer = new WordnetStemmer(dict);

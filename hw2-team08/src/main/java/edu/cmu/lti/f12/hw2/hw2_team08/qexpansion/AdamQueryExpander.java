@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.store.FSDirectory;
+
 /*
  * The AdamQueryExpander wraps the ADAM database
  * (Another Database of Abbreviations in MEDLINE)
@@ -25,72 +28,75 @@ import java.util.Properties;
  */
 public class AdamQueryExpander extends AbstractQueryExpander {
 
-  private Map<String, List<String>> mTermVariantMap;
+	private Map<String, List<String>> mTermVariantMap;
 
-  @Override
-  public boolean init(Properties prop) {
-    mTermVariantMap = new HashMap<String, List<String>>();
-    
-    try {
-      String indexDir = (String) prop.getProperty("parameter");
-      File adamFile = new File(indexDir);
-      loadMap(adamFile);
-    } catch (IOException e) {
-      return false;
-    }
-    return true;
-  }
+	@Override
+	public boolean init(Properties prop) {
+		mTermVariantMap = new HashMap<String, List<String>>();
 
-  private void loadMap(File file) throws FileNotFoundException, IOException {
-    BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-    String line;
+		try {
+			String indexDir = (String) prop.getProperty("parameter");
+			File adamFile = new File(this.getClass().getResource(indexDir)
+					.getFile());
+			loadMap(adamFile);
+		} catch (IOException e) {
+			return false;
+		}
+		return true;
+	}
 
-    while ((line = br.readLine()) != null) {
-      if (line.startsWith("#")) {
-        continue;
-      }
-      String[] columns = line.split("\t");
+	private void loadMap(File file) throws FileNotFoundException, IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(
+				new FileInputStream(file)));
+		String line;
 
-      String term = columns[0];
-      if (!mTermVariantMap.containsKey(term)) {
-        mTermVariantMap.put(term, new ArrayList<String>());
-      }
+		while ((line = br.readLine()) != null) {
+			if (line.startsWith("#")) {
+				continue;
+			}
+			String[] columns = line.split("\t");
 
-      String[] variants = columns[2].split("\\|");
-      for (int i = 0; i < variants.length; i++) {
-        String variant = variants[i];
-        String[] tmp = variant.split(":");
-        String var = tmp[0];
+			String term = columns[0];
+			if (!mTermVariantMap.containsKey(term)) {
+				mTermVariantMap.put(term, new ArrayList<String>());
+			}
 
-        mTermVariantMap.get(term).add(var);
-      }
-    }
-  }
+			String[] variants = columns[2].split("\\|");
+			for (int i = 0; i < variants.length; i++) {
+				String variant = variants[i];
+				String[] tmp = variant.split(":");
+				String var = tmp[0];
 
-  @Override
-  public List<String> expandQuery(String query, int size) {
-    List<String> retval = new ArrayList<String>();
-    if (mTermVariantMap.containsKey(query)) {
-      retval = mTermVariantMap.get(query);
-    }
+				mTermVariantMap.get(term).add(var);
+			}
+		}
+	}
 
-    if (retval.size() > size)
-      return retval.subList(0, size);
+	@Override
+	public List<String> expandQuery(String query, int size) {
+		List<String> retval = new ArrayList<String>();
+		if (mTermVariantMap.containsKey(query)) {
+			retval = mTermVariantMap.get(query);
+		}
 
-    return retval;
-  }
+		if (retval.size() > size)
+			return retval.subList(0, size);
 
-  public static void main(String[] args) throws FileNotFoundException, IOException {
-    AdamQueryExpander expander = new AdamQueryExpander();
-    Properties prop = new Properties();
-    prop.setProperty("database", "data/adam_database");
-    expander.init(prop);
+		return retval;
+	}
 
-    String query = "BRCA1";
-    List<String> expandedQueries = expander.expandQuery(query, 1);
+	public static void main(String[] args) throws FileNotFoundException,
+			IOException {
+		AdamQueryExpander expander = new AdamQueryExpander();
+		Properties prop = new Properties();
+		prop.setProperty("database", "data/adam_database");
+		expander.init(prop);
 
-    for (String expandedQuery : expandedQueries) {
-      System.out.println(expandedQuery);
-    }
-  }
+		String query = "BRCA1";
+		List<String> expandedQueries = expander.expandQuery(query, 1);
+
+		for (String expandedQuery : expandedQueries) {
+			System.out.println(expandedQuery);
+		}
+	}
 }
