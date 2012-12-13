@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -22,99 +23,96 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
+/**
+ * 
+ * The MeshQueryExpander class uses the See <a
+ * href="http://www.nlm.nih.gov/mesh/meshhome.html">MeSH</a> to find the gene's
+ * synonyms.
+ * 
+ * @author <a href="mailto:norii@andrew.cmu.edu">Naoki Orii</a>
+ */
 public class MeshQueryExpander extends AbstractQueryExpander {
 
-  private IndexSearcher searcher;
+	private IndexSearcher searcher;
 
-  private StandardAnalyzer analyzer;
+	private StandardAnalyzer analyzer;
 
-  private IndexReader reader;
+	private IndexReader reader;
 
-  // Use singleton pattern
-  private MeshQueryExpander() {
-  }
+	@Override
+	public boolean init(Properties prop) {
+		try {
+			String indexDir = (String) prop.getProperty("parameter");
+			this.reader = IndexReader
+					.open(FSDirectory.open(new File(indexDir)));
+		} catch (IOException e) {
+			return false;
+		}
+		this.searcher = new IndexSearcher(reader);
+		this.analyzer = new StandardAnalyzer(Version.LUCENE_36);
+		return true;
+	}
 
-  private static MeshQueryExpander instance = null;
+	@Override
+	public List<String> expandQuery(String q, int size) {
+		List<String> retval = new ArrayList<String>();
 
-  public static MeshQueryExpander getInstance() {
-    if (instance == null) {
-      instance = new MeshQueryExpander();
-    }
-    return instance;
-  }
+		try {
+			QueryParser parser = new QueryParser(Version.LUCENE_36, "synonym",
+					analyzer);
+			Query query = parser.parse(q);
 
-  @Override
-  public boolean init(Properties prop) {
-    try {
-      URI indexDir = getClass().getClassLoader().getResource((String) prop.getProperty("index")).toURI();
-      this.reader = IndexReader.open(FSDirectory.open(new File(indexDir)));
-    } catch (IOException e) {
-      return false;
-    } catch (URISyntaxException e) {
-      return false;
-    }
-    this.searcher = new IndexSearcher(reader);
-    this.analyzer = new StandardAnalyzer(Version.LUCENE_36);
-    return true;
-  }
+			TopDocs results = searcher.search(query, null, 10);
+			ScoreDoc[] hits = results.scoreDocs;
 
-  @Override
-  public List<String> expandQuery(String q, int size) {
-    List<String> retval = new ArrayList<String>();
+			int numTotalHits = results.totalHits;
+			if (numTotalHits == 0) {
+				return retval;
+			}
 
-    try {
-      QueryParser parser = new QueryParser(Version.LUCENE_36, "synonym", analyzer);
-      Query query = parser.parse(q);
+			Document doc = searcher.doc(hits[0].doc);
+			String[] synonyms = doc.getValues("synonym");
+			for (String synonym : synonyms) {
+				retval.add(synonym);
+			}
 
-      TopDocs results = searcher.search(query, null, 10);
-      ScoreDoc[] hits = results.scoreDocs;
+			String hypernym = doc.get("hypernym");
+			retval.add(hypernym);
 
-      int numTotalHits = results.totalHits;
-      if (numTotalHits == 0) {
-        return retval;
-      }
+			String[] hyponyms = doc.getValues("hyponym");
+			for (String hyponym : hyponyms) {
+				retval.add(hyponym);
+			}
 
-      Document doc = searcher.doc(hits[0].doc);
-      String[] synonyms = doc.getValues("synonym");
-      for (String synonym : synonyms) {
-        retval.add(synonym);
-      }
+		} catch (CorruptIndexException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		// Remove repeated terms
+		List<String> retlist = new ArrayList<String>(new LinkedHashSet<String>(
+				retval));
 
-      String hypernym = doc.get("hypernym");
-      retval.add(hypernym);
+		if (retlist.size() > size)
+			return retlist.subList(0, size);
 
-      String[] hyponyms = doc.getValues("hyponym");
-      for (String hyponym : hyponyms) {
-        retval.add(hyponym);
-      }
+		return retlist;
+	}
 
-    } catch (CorruptIndexException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    } catch (ParseException e) {
-      e.printStackTrace();
-    }
-    // Remove repeated terms
-    List<String> retlist = new ArrayList<String>(new LinkedHashSet<String>(retval));
+	public static void main(String[] args) throws CorruptIndexException,
+			IOException {
+		MeshQueryExpander expander = new MeshQueryExpander();
+		Properties prop = new Properties();
+		prop.setProperty("index", "data/mesh.lucene.index");
+		expander.init(prop);
 
-    if (retlist.size() > size)
-      return retlist.subList(0, size);
+		String query = "head";
+		List<String> expandedQueries = expander.expandQuery(query, 2);
 
-    return retlist;
-  }
-
-  public static void main(String[] args) throws CorruptIndexException, IOException {
-    MeshQueryExpander expander = MeshQueryExpander.getInstance();
-    Properties prop = new Properties();
-    prop.setProperty("index", "data/mesh.lucene.index");
-    expander.init(prop);
-
-    String query = "head";
-    List<String> expandedQueries = expander.expandQuery(query, 2);
-
-    for (String expandedQuery : expandedQueries) {
-      System.out.println(expandedQuery);
-    }
-  }
+		for (String expandedQuery : expandedQueries) {
+			System.out.println(expandedQuery);
+		}
+	}
 }

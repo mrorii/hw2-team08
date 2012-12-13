@@ -20,35 +20,22 @@ import java.util.Properties;
  * and retrieves long forms for abbreviated terms.
  * 
  * See <a href="http://arrowsmith.psych.uic.edu/arrowsmith_uic/adam.html">URL</a>
+ *
+ * @author <a href="mailto:norii@andrew.cmu.edu">Naoki Orii</a>
  */
 public class AdamQueryExpander extends AbstractQueryExpander {
 
   private Map<String, List<String>> mTermVariantMap;
-
-  // Use singleton pattern
-  private static AdamQueryExpander instance = null;
-
-  public static AdamQueryExpander getInstance() {
-    if (instance == null) {
-      instance = new AdamQueryExpander();
-    }
-    return instance;
-  }
-
-  private AdamQueryExpander() {
-  }
 
   @Override
   public boolean init(Properties prop) {
     mTermVariantMap = new HashMap<String, List<String>>();
     
     try {
-      URI indexDir = getClass().getClassLoader().getResource((String) prop.getProperty("database")).toURI();
+      String indexDir = (String) prop.getProperty("parameter");
       File adamFile = new File(indexDir);
       loadMap(adamFile);
     } catch (IOException e) {
-      return false;
-    } catch (URISyntaxException e) {
       return false;
     }
     return true;
@@ -94,7 +81,7 @@ public class AdamQueryExpander extends AbstractQueryExpander {
   }
 
   public static void main(String[] args) throws FileNotFoundException, IOException {
-    AdamQueryExpander expander = AdamQueryExpander.getInstance();
+    AdamQueryExpander expander = new AdamQueryExpander();
     Properties prop = new Properties();
     prop.setProperty("database", "data/adam_database");
     expander.init(prop);
