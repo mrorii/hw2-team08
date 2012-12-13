@@ -24,12 +24,6 @@ public class GeneEntrezQueryExpander extends AbstractQueryExpander {
 	/** The dictionary containing the similar gene names. */
 	private HashMap<String, String[]> mGeneSynonymMap;
 
-	/**
-	 * Instantiates a new gene entrez query expander.
-	 */
-	private GeneEntrezQueryExpander() {
-	}
-
 	@Override
 	public boolean init(Properties prop) {
 		mGeneSynonymMap = new HashMap<String, String[]>();

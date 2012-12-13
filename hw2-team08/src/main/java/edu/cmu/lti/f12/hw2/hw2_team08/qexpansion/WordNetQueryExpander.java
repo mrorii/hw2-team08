@@ -1,5 +1,6 @@
 package edu.cmu.lti.f12.hw2.hw2_team08.qexpansion;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -16,85 +17,74 @@ import edu.mit.jwi.morph.WordnetStemmer;
 
 /**
  * 
- * The WordNetQueryExpander class uses the See <a href="http://wordnet.princeton.edu">WordNet</a> to
- * stem the query words and find its synonyms.
+ * The WordNetQueryExpander class uses the See <a
+ * href="http://wordnet.princeton.edu">WordNet</a> to stem the query words and
+ * find its synonyms.
  * 
  * @author <a href="mailto:yuangu@andrew.cmu.edu">Yuan Gu</a>
  */
+
 public class WordNetQueryExpander extends AbstractQueryExpander {
 
-  // Use singleton pattern
-  private IDictionary dict;
+	// Use singleton pattern
+	private IDictionary dict;
 
-  private WordnetStemmer stemmer;
+	private WordnetStemmer stemmer;
 
-  private WordNetQueryExpander() {
-    dict = null;
-  }
+	@Override
+	public boolean init(Properties prop) {
+		try {
 
-  @Override
-  public boolean init(Properties prop) {
-    URL url;
-    try {
-      url = getClass().getClassLoader().getResource((String) prop.getProperty("dictionary"));
-      dict = new Dictionary(url);
-      dict.open();
-      stemmer = new WordnetStemmer(dict);
-    } catch (IOException e) {
-      return false;
-    }
+			File dictFile = new File((String) prop.getProperty("parameter"));
+			dict = new Dictionary(dictFile);
+			dict.open();
+			stemmer = new WordnetStemmer(dict);
+		} catch (IOException e) {
+			return false;
+		}
 
-    return true;
-  }
+		return true;
+	}
 
-  private static WordNetQueryExpander instance = null;
+	@Override
+	public List<String> expandQuery(String query, int size) {
 
-  public static WordNetQueryExpander getInstance() {
-    if (instance == null) {
-      instance = new WordNetQueryExpander();
-    }
-    return instance;
-  }
+		List<String> stems = stemmer.findStems(query, POS.VERB);
+		if (stems == null || stems.size() == 0)
+			return null;
 
-  @Override
-  public List<String> expandQuery(String query, int size) {
+		IIndexWord idxWord = dict.getIndexWord(stems.get(0), POS.VERB);
+		if (idxWord == null || idxWord.getWordIDs().isEmpty())
+			return null;
 
-    List<String> stems = stemmer.findStems(query, POS.VERB);
-    if (stems == null || stems.size() == 0)
-      return null;
+		IWordID wordID = idxWord.getWordIDs().get(0); // 1st meaning
+		IWord word = dict.getWord(wordID);
+		ISynset synset = word.getSynset();
+		List<IWord> words = synset.getWords();
+		List<String> expandedQueries = new ArrayList<String>(words.size());
+		for (IWord w : synset.getWords()) {
+			String lemma = w.getLemma();
+			lemma = lemma.replaceAll("_", " ");
+			expandedQueries.add(lemma);
+		}
 
-    IIndexWord idxWord = dict.getIndexWord(stems.get(0), POS.VERB);
-    if (idxWord == null || idxWord.getWordIDs().isEmpty())
-      return null;
+		if (expandedQueries.size() > size)
+			return expandedQueries.subList(0, size);
 
-    IWordID wordID = idxWord.getWordIDs().get(0); // 1st meaning
-    IWord word = dict.getWord(wordID);
-    ISynset synset = word.getSynset();
-    List<IWord> words = synset.getWords();
-    List<String> expandedQueries = new ArrayList<String>(words.size());
-    for (IWord w : synset.getWords()) {
-      String lemma = w.getLemma();
-      lemma = lemma.replaceAll("_", " ");
-      expandedQueries.add(lemma);
-    }
-    
-    if (expandedQueries.size() > size)
-      return expandedQueries.subList(0, size);
+		return expandedQueries;
+	}
 
-    return expandedQueries;
-  }
+	public static void main(String[] args) throws IOException {
+		AbstractQueryExpander expander = new WordNetQueryExpander();
+		Properties prop = new Properties();
+		prop.setProperty("dictionary", "data/wordnet-dict");
+		expander.init(prop);
 
-  public static void main(String[] args) throws IOException {
-    AbstractQueryExpander expander = WordNetQueryExpander.getInstance();
-    Properties prop = new Properties();
-    prop.setProperty("dictionary", "data/wordnet-dict");
-    expander.init(prop);
+		String query = "affected";
+		List<String> expandedQueries = expander.expandQuery(query, 100);
 
-    String query = "affected";
-    List<String> expandedQueries = expander.expandQuery(query, 100);
-
-    for (String expandedQuery : expandedQueries) {
-      System.out.println(expandedQuery);
-    }
-  }
+		for (String expandedQuery : expandedQueries) {
+			System.out.println(expandedQuery);
+		}
+	}
 }
