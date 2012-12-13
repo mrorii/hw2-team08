@@ -89,7 +89,7 @@
 		</dependency>
 	</dependencies>
 	<scm>
-		<connection>scm:git:git@github.com:mrorii/hw2-team08.git</connection>
-		<developerConnection>scm:git:git@github.com:mrorii/hw2-team08.git</developerConnection>
+		<connection>scm:git:git@github.com:htcbug/hw2-team08.git</connection>
+		<developerConnection>scm:git:git@github.com:htcbug/hw2-team08.git</developerConnection>
 	</scm>
 </project>
